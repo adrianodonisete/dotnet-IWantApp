@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Flunt.Notifications;
+using IWantAPP.Domain.Products;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Flunt.Notifications;
-
-using IWantAPP.Domain.Products;
 
 namespace IWantAPP.Infra.Data;
 
