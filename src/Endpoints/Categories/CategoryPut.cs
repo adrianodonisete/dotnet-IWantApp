@@ -5,7 +5,7 @@ namespace IWantAPP.Endpoints.Categories;
 
 public class CategoryPut
 {
-    public static string Template => "/Categories/{id:guid}";
+    public static string Template => "/categories/{id:guid}";
     public static string[] Methods => new string[] { HttpMethod.Put.ToString() };
     public static Delegate Handle => Action;
 

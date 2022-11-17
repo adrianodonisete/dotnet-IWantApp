@@ -13,6 +13,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(
         options.Password.RequireDigit = false;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddScoped<QueryAllUsersWithClaims>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,5 +33,6 @@ app.MapMethods(CategoryGetAll.Template, CategoryGetAll.Methods, CategoryGetAll.H
 app.MapMethods(CategoryPut.Template, CategoryPut.Methods, CategoryPut.Handle);
 app.MapMethods(EmployeePost.Template, EmployeePost.Methods, EmployeePost.Handle);
 app.MapMethods(EmployeeGetAll.Template, EmployeeGetAll.Methods, EmployeeGetAll.Handle);
+app.MapMethods(EmployeeGetClaim.Template, EmployeeGetClaim.Methods, EmployeeGetClaim.Handle);
 
 app.Run();

@@ -4,7 +4,7 @@ namespace IWantAPP.Endpoints.Categories;
 
 public class CategoryGetAll
 {
-    public static string Template => "/Categories";
+    public static string Template => "/categories";
     public static string[] Methods => new string[] { HttpMethod.Get.ToString() };
     public static Delegate Handle => Action;
 
