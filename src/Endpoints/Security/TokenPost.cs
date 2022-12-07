@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using IWantAPP.Infra.Config;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,7 +14,8 @@ public class TokenPost
     public static string[] Methods => new string[] { HttpMethod.Post.ToString() };
     public static Delegate Handle => Action;
 
-    public static IResult Action(LoginRequest loginRequest, UserManager<IdentityUser> userManager)
+    [AllowAnonymous]
+    public static IResult Action(LoginRequest loginRequest, IConfiguration configuration, UserManager<IdentityUser> userManager)
     {
         try
         {
@@ -22,27 +25,25 @@ public class TokenPost
                 throw new Exception("Login invalid");
             }
 
-            var key = Encoding.ASCII.GetBytes("A@fderwfQQ");
+            var key = Encoding.ASCII.GetBytes(configuration["JwtBearerTokenSettings:SecretKey"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Email, loginRequest.Email),
+                    new Claim("EmployeeCode", "0002255"),
                 }),
                 SigningCredentials =
                     new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                Audience = "IWantApp",
-                Issuer = "Issuer"
+                Audience = configuration["JwtBearerTokenSettings:Audience"],
+                Issuer = configuration["JwtBearerTokenSettings:Issuer"]
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
+            var finalToken = tokenHandler.WriteToken(token);
 
-            return Results.Ok(new
-            {
-                token = tokenHandler.WriteToken(token)
-            }); ;
-
+            return Results.Ok(new { token = finalToken });
         }
         catch (Exception ex)
         {
