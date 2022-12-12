@@ -30,8 +30,9 @@ builder.Services.AddAuthorization(options =>
         .Build();
 
     options.AddPolicy("EmployeePolicy",
-            p => p.RequireAuthenticatedUser().RequireClaim("EmployeeCode")
-        );
+        p => p.RequireAuthenticatedUser().RequireClaim("EmployeeCode"));
+    options.AddPolicy("Employee005Policy",
+        p => p.RequireAuthenticatedUser().RequireClaim("EmployeeCode", "0002255"));
 });
 builder.Services.AddAuthentication(x =>
 {
@@ -43,8 +44,10 @@ builder.Services.AddAuthentication(x =>
     {
         ValidateActor = true,
         ValidateAudience = true,
+        ValidateIssuer = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
         ValidIssuer = builder.Configuration["JwtBearerTokenSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtBearerTokenSettings:Audience"],
         IssuerSigningKey =

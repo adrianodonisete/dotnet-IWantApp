@@ -25,18 +25,23 @@ public class TokenPost
                 throw new Exception("Login invalid");
             }
 
+            var claims = userManager.GetClaimsAsync(user).Result;
+            var subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, loginRequest.Email),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                });
+            subject.AddClaims(claims);
+
             var key = Encoding.ASCII.GetBytes(configuration["JwtBearerTokenSettings:SecretKey"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Email, loginRequest.Email),
-                    new Claim("EmployeeCode", "0002255"),
-                }),
+                Subject = subject,
                 SigningCredentials =
                     new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Audience = configuration["JwtBearerTokenSettings:Audience"],
-                Issuer = configuration["JwtBearerTokenSettings:Issuer"]
+                Issuer = configuration["JwtBearerTokenSettings:Issuer"],
+                Expires = DateTime.UtcNow.AddHours(2),
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -47,7 +52,11 @@ public class TokenPost
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(new { success = false, message = ex.Message });
+            return Results.BadRequest(new
+            {
+                success = false,
+                message = ex.Message
+            });
         }
     }
 }
