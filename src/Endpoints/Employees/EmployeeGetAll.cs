@@ -10,9 +10,9 @@ public class EmployeeGetAll
     public static Delegate Handle => Action;
 
     [Authorize(Policy = "EmployeePolicy")]
-    public static IResult Action(int? offset, int? limit, QueryAllUsersWithClaims query)
+    public static async Task<IResult> Action(int? offset, int? limit, QueryAllUsersWithClaims query)
     {
-        var employees = query.Execute(offset, limit);
+        var employees = await query.Execute(offset, limit);
 
         return Results.Ok(new
         {

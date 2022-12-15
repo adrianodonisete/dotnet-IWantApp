@@ -11,10 +11,10 @@ public class QueryAllUsersWithClaims
 
     public QueryAllUsersWithClaims()
     {
-        this.db = new Connection().GetConnection();
+        db = new Connection().GetConnection();
     }
 
-    public IEnumerable<EmployeeResponse> Execute(int? offset, int? limit)
+    public async Task<IEnumerable<EmployeeResponse>> Execute(int? offset, int? limit)
     {
         offset = offset ?? 1;
         limit = limit ?? 10;
@@ -27,6 +27,9 @@ public class QueryAllUsersWithClaims
                 ORDER BY [Name] ASC
                 OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY;";
 
-        return this.db.Query<EmployeeResponse>(query, new { offset, limit });
+        return await db.QueryAsync<EmployeeResponse>(
+            query,
+            new { offset, limit }
+        );
     }
 }

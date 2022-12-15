@@ -11,7 +11,7 @@ public class EmployeePost
     public static Delegate Handle => Action;
 
     [Authorize(Policy = "EmployeePolicy")]
-    public static IResult Action(EmployeeRequest employeeRequest, HttpContext http, UserManager<IdentityUser> userManager)
+    public static async Task<IResult> Action(EmployeeRequest employeeRequest, HttpContext http, UserManager<IdentityUser> userManager)
     {
         try
         {
@@ -21,7 +21,7 @@ public class EmployeePost
                 Email = employeeRequest.Email
             };
 
-            var result = userManager.CreateAsync(user, employeeRequest.Password).Result;
+            var result = await userManager.CreateAsync(user, employeeRequest.Password);
             if (!result.Succeeded)
             {
                 return Results.ValidationProblem(result.Errors.ConvertToProblemDetails());
@@ -35,10 +35,10 @@ public class EmployeePost
                 new Claim("CreatedBy", userIdAuth),
             };
 
-            var claimResult = userManager.AddClaimsAsync(user, userClaims).Result;
+            var claimResult = await userManager.AddClaimsAsync(user, userClaims);
             if (!claimResult.Succeeded)
             {
-                userManager.DeleteAsync(user);
+                await userManager.DeleteAsync(user);
 
                 return Results.ValidationProblem(claimResult.Errors.ConvertToProblemDetails());
             }
