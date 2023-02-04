@@ -15,13 +15,20 @@ public class TokenPost
     public static Delegate Handle => Action;
 
     [AllowAnonymous]
-    public static IResult Action(LoginRequest loginRequest, IConfiguration configuration, UserManager<IdentityUser> userManager)
+    public static IResult Action(
+        LoginRequest loginRequest, IConfiguration configuration,
+        UserManager<IdentityUser> userManager, ILogger<TokenPost> log
+    )
     {
         try
         {
+            log.LogInformation("Getting token");
+            log.LogWarning("warning");
+
             var user = userManager.FindByEmailAsync(loginRequest.Email).Result;
             if (user == null || !userManager.CheckPasswordAsync(user, loginRequest.Password).Result)
             {
+                log.LogError("Login invalid");
                 throw new Exception("Login invalid");
             }
 
@@ -41,21 +48,29 @@ public class TokenPost
                     new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Audience = configuration["JwtBearerTokenSettings:Audience"],
                 Issuer = configuration["JwtBearerTokenSettings:Issuer"],
-                Expires = DateTime.UtcNow.AddHours(2),
+                Expires = DateTime.UtcNow.AddHours(1),
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var finalToken = tokenHandler.WriteToken(token);
 
-            return Results.Ok(new { token = finalToken });
+            return Results.Ok(new
+            {
+                success = true,
+                message = "Ok",
+                token = finalToken,
+                expire = 3600
+            });
         }
         catch (Exception ex)
         {
+            //throw new Exception(ex.Message);
             return Results.BadRequest(new
             {
                 success = false,
-                message = ex.Message
+                message = ex.Message,
+                extra = "falhou 2"
             });
         }
     }

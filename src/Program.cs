@@ -5,11 +5,33 @@ using IWantAPP.Infra.Config;
 using IWantAPP.Infra.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+//#pragma warning disable CS0618 // Type or member is obsolete
+//builder.WebHost.UseSerilog(
+//    (context, configuration) =>
+//{
+//    configuration
+//        .WriteTo.Console()
+//        .WriteTo.MSSqlServer(
+//            connectString.ToString(),
+//            sinkOptions: new MSSqlServerSinkOptions()
+//            {
+//                AutoCreateSqlTable = true,
+//                TableName = "LogApi"
+//            });
+//});
+//#pragma warning restore CS0618 // Type or member is obsolete
+
 builder.Services.AddSqlServer<ApplicationDbContext>(new ConfigDb().getStringCon());
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(
     options =>
@@ -67,7 +89,10 @@ app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    });
 }
 
 app.UseHttpsRedirection();
@@ -79,5 +104,20 @@ app.MapMethods(EmployeePost.Template, EmployeePost.Methods, EmployeePost.Handle)
 app.MapMethods(EmployeeGetAll.Template, EmployeeGetAll.Methods, EmployeeGetAll.Handle);
 app.MapMethods(EmployeeGetClaim.Template, EmployeeGetClaim.Methods, EmployeeGetClaim.Handle);
 app.MapMethods(TokenPost.Template, TokenPost.Methods, TokenPost.Handle);
+
+app.UseExceptionHandler("/error");
+app.Map("/error", (HttpContext http) =>
+{
+    var error = http.Features?.Get<IExceptionHandlerFeature>()?.Error;
+    if (error != null)
+    {
+        if (error is SqlException)
+        {
+            return Results.Problem(title: "Database out", statusCode: 500);
+        }
+    }
+
+    return Results.Problem(title: "Error! An error ocurred", statusCode: 500);
+});
 
 app.Run();
