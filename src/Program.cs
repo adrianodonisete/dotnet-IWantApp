@@ -12,27 +12,30 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
 using System.Text;
-
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//#pragma warning disable CS0618 // Type or member is obsolete
-//builder.WebHost.UseSerilog(
-//    (context, configuration) =>
-//{
-//    configuration
-//        .WriteTo.Console()
-//        .WriteTo.MSSqlServer(
-//            connectString.ToString(),
-//            sinkOptions: new MSSqlServerSinkOptions()
-//            {
-//                AutoCreateSqlTable = true,
-//                TableName = "LogApi"
-//            });
-//});
-//#pragma warning restore CS0618 // Type or member is obsolete
+var connectString = new ConfigDb().getStringCon();
 
-builder.Services.AddSqlServer<ApplicationDbContext>(new ConfigDb().getStringCon());
+
+#pragma warning disable CS0618 // Type or member is obsolete
+builder.WebHost.UseSerilog(
+    (context, configuration) =>
+{
+    configuration
+        .WriteTo.Console()
+        .WriteTo.MSSqlServer(
+            connectString,
+            sinkOptions: new MSSqlServerSinkOptions()
+            {
+                AutoCreateSqlTable = true,
+                TableName = "LogApi"
+            });
+});
+#pragma warning restore CS0618 // Type or member is obsolete
+
+builder.Services.AddSqlServer<ApplicationDbContext>(connectString);
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(
     options =>
     {
@@ -114,6 +117,14 @@ app.Map("/error", (HttpContext http) =>
         if (error is SqlException)
         {
             return Results.Problem(title: "Database out", statusCode: 500);
+        }
+        else if (error is BadHttpRequestException)
+        {
+            return Results.Problem(title: "Error to convert data to other type. Check documentation", statusCode: 500);
+        }
+        else if (error is JsonException)
+        {
+            return Results.Problem(title: "Error invalid JSON format", statusCode: 500);
         }
     }
 

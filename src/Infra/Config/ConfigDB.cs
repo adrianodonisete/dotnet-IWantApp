@@ -6,14 +6,20 @@ public class ConfigDb
 {
     public string getStringCon()
     {
-        var builderConn = new SqlConnectionStringBuilder
-        {
-            DataSource = "localhost",
-            InitialCatalog = "IWantDb",
-            UserID = "sa",
-            Password = "@Sql2022"
-        };
+        //var builderConn = new SqlConnectionStringBuilder
+        //{
+        //    DataSource = "localhost",
+        //    InitialCatalog = "IWantDb",
+        //    UserID = "sa",
+        //    Password = "@Sql2022",
+        //    //TrustServerCertificate = true,
+        //    IntegratedSecurity = true,
+        //};
 
-        return builderConn.ConnectionString;
+        ////private const string connString = "Server=.\\SQLEXPRESS;Database=Blog;Integrated Security=SSPI;TrustServerCertificate=True";
+
+        //return builderConn.ConnectionString;
+
+        return "Server=localhost; Database=IWantDb; User Id=sa; Password=@Sql2022; TrustServerCertificate=True";
     }
 }

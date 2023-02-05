@@ -23,6 +23,8 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .Property(p => p.Name).IsRequired();
         builder.Entity<Product>()
             .Property(p => p.Description).HasMaxLength(255).IsRequired(false);
+        builder.Entity<Product>()
+            .Property(p => p.Price).HasColumnType("decimal(10,2)").IsRequired();
 
         builder.Entity<Category>()
             .Property(p => p.Name).IsRequired();
