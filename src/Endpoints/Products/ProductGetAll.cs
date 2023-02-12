@@ -17,7 +17,7 @@ public class ProductGetAll
         var response = products.Select(p => new ProductResponse
         {
             Name = p.Name,
-            CategoryName = p.Category.Name,
+            CategoryName = p.Category?.Name,
             Description = p.Description,
             HasStock = p.HasStock,
             Active = p.Active,

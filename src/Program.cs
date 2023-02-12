@@ -1,5 +1,6 @@
 using IWantAPP.Endpoints.Categories;
 using IWantAPP.Endpoints.Employees;
+using IWantAPP.Endpoints.Products;
 using IWantAPP.Endpoints.Security;
 using IWantAPP.Infra.Config;
 using IWantAPP.Infra.Data;
@@ -100,6 +101,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapMethods(ProductGetShowcase.Template, ProductGetShowcase.Methods, ProductGetShowcase.Handle);
+app.MapMethods(ProductGetAll.Template, ProductGetAll.Methods, ProductGetAll.Handle);
 app.MapMethods(CategoryPost.Template, CategoryPost.Methods, CategoryPost.Handle);
 app.MapMethods(CategoryGetAll.Template, CategoryGetAll.Methods, CategoryGetAll.Handle);
 app.MapMethods(CategoryPut.Template, CategoryPut.Methods, CategoryPut.Handle);

@@ -16,8 +16,11 @@ public class TokenPost
 
     [AllowAnonymous]
     public static IResult Action(
-        LoginRequest loginRequest, IConfiguration configuration,
-        UserManager<IdentityUser> userManager, ILogger<TokenPost> log
+        LoginRequest loginRequest,
+        IConfiguration configuration,
+        UserManager<IdentityUser> userManager,
+        ILogger<TokenPost> log,
+        IWebHostEnvironment environment
     )
     {
         try
@@ -48,7 +51,9 @@ public class TokenPost
                     new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Audience = configuration["JwtBearerTokenSettings:Audience"],
                 Issuer = configuration["JwtBearerTokenSettings:Issuer"],
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = environment.IsDevelopment() || environment.IsStaging()
+                    ? DateTime.UtcNow.AddYears(1)
+                    : DateTime.UtcNow.AddHours(1),
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -65,7 +70,6 @@ public class TokenPost
         }
         catch (Exception ex)
         {
-            //throw new Exception(ex.Message);
             return Results.BadRequest(new
             {
                 success = false,
